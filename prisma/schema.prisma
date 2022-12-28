@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator typegraphql {
+  provider = "typegraphql-prisma"
+  emitIdAsIDType = true
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserProfile {
+  id        Int      @id @default(autoincrement())
+  createdOn DateTime @default(now())
+  eoa       String   @unique @db.VarChar(80)
+  pubKey    String   @unique @db.VarChar(50)
+  secretKey String   @unique @db.VarChar(110)
+  isEOAWeb2 Boolean  @default(false)
+  channel   String   @db.VarChar(50)
+
+  forms         Form[]
+  formResponses FormResponse[]
+
+  @@index([eoa, pubKey])
+}
+
+model Form {
+  id          String      @id @default(uuid())
+  createdOn   DateTime    @default(now())
+  updatedOn   DateTime    @default(now())
+  title       String      @db.VarChar(300)
+  cid         String      @unique @db.VarChar(64)
+  isClosed    Boolean     @default(false)
+  userId      Int
+  user        UserProfile @relation(fields: [userId], references: [id])
+  ownerEOA    String      @unique @db.VarChar(80)
+  ownerpubKey String      @unique @db.VarChar(50)
+
+  formResponses FormResponse[]
+  FormStats     FormStats[]
+}
+
+model FormResponse {
+  id          String      @id @default(uuid())
+  createdOn   DateTime    @default(now())
+  updatedOn   DateTime    @default(now())
+  formId      String
+  form        Form        @relation(fields: [formId], references: [id])
+  ownerEOA    String      @unique @db.VarChar(80)
+  ownerpubKey String      @unique @db.VarChar(50)
+  cid         String      @unique @db.VarChar(64)
+  userId      Int
+  user        UserProfile @relation(fields: [userId], references: [id])
+}
+
+model FormStats {
+  id               Int      @id @default(autoincrement())
+  createdOn        DateTime @default(now())
+  updatedOn        DateTime @default(now())
+  numberOfResponse Int
+  stats            Json
+
+  formId String
+  form   Form   @relation(fields: [formId], references: [id])
+}

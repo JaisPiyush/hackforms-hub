@@ -60,7 +60,6 @@ describe('Testing WEB3STORAGE utility module', () => {
         const data  = JSON.stringify(obj);
         const cid = await client.store(data, client.generateRandomName());
         const file = await client.get(cid);
-        console.log(file);
         expect(JSON.parse(await file.text())).toStrictEqual(obj);
 
     })
