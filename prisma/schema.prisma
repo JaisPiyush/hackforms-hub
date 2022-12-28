@@ -47,6 +47,13 @@ model Form {
   FormStats     FormStats[]
 }
 
+
+model FormCommonKey {
+  id Int @id @default(autoincrement())
+  formId String 
+  key String @db.VarChar(300)
+}
+
 model FormResponse {
   id          String      @id @default(uuid())
   createdOn   DateTime    @default(now())
