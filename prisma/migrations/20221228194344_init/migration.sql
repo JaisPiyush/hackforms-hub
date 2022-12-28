@@ -6,7 +6,6 @@ CREATE TABLE "UserProfile" (
     "pubKey" VARCHAR(50) NOT NULL,
     "secretKey" VARCHAR(110) NOT NULL,
     "isEOAWeb2" BOOLEAN NOT NULL DEFAULT false,
-    "channel" VARCHAR(50) NOT NULL,
 
     CONSTRAINT "UserProfile_pkey" PRIMARY KEY ("id")
 );

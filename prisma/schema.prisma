@@ -5,10 +5,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator typegraphql {
-  provider = "typegraphql-prisma"
-  emitIdAsIDType = true
-}
+// generator typegraphql {
+//   provider = "typegraphql-prisma"
+//   emitIdAsIDType = true
+//   output = "../src/generated/resolvers"
+//   customPrismaImportPath  = "../prisma"
+// }
 
 datasource db {
   provider = "postgresql"
@@ -22,7 +24,6 @@ model UserProfile {
   pubKey    String   @unique @db.VarChar(50)
   secretKey String   @unique @db.VarChar(110)
   isEOAWeb2 Boolean  @default(false)
-  channel   String   @db.VarChar(50)
 
   forms         Form[]
   formResponses FormResponse[]
