@@ -20,7 +20,7 @@ export class FormService {
         private readonly formStateService: FormStatsService,
         ) {}
 
-    public async generateFormId() {
+    public generateFormId() {
         return uuidv4();
     }
     
@@ -49,7 +49,9 @@ export class FormService {
     }
 
     public async createForm(user: UserProfile, body: CreateFormBody ): Promise<ResponseSchema<SerializedForm>> {
-
+            
+            const formId = this.generateFormId();
+            body.form.payload.meta.formId = formId;
             const meta = body.form.payload.meta;
             if (body.form.header.access !== PrismaAccess.public) {
                 if (body.key === undefined) {
@@ -80,7 +82,7 @@ export class FormService {
                 }
             });
 
-            await this.formStateService.createFormStats(form.id);
+            await this.formStateService.createFormStats(form);
 
             if (body.form.header.access !== PrismaAccess.public) {
                 await this.formCommonKeyService.createOrUpdateFormCommonKey(form.id, body.key as string);
@@ -212,6 +214,36 @@ export class FormService {
             }
         }
 
+    }
+
+    // API used to load not owned forms data in bulk for e.g from notifications
+    public async getFormsStatus(formIds: string[]): Promise<ResponseSchema<SerializedForm[]>> {
+        const forms = await this.prisma.form.findMany({
+            where: {
+                id: {
+                    in: formIds
+                }
+            },
+            select: {
+                id: true,
+                createdOn: true,
+                title: true,
+                cid: true,
+                isClosed: true,
+                access: true
+            }
+        });
+        return {
+            status: 200,
+            res: {
+                data: forms.map((form) => {
+                    return {
+                        form: form,
+                        rawContentUrl: this.storage.getUrl(form.cid)
+                    }
+                })
+            }
+        }
     }
 
     public async getFormAnalytics(formId: string): Promise<ResponseSchema<SerializedFormAnalytics>> {

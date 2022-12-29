@@ -1,9 +1,15 @@
-import { Form, FormStats, UserProfile } from "@prisma/client";
+import { Form, FormResponse, FormStats, UserProfile } from "@prisma/client";
 import { EncryptedFormDto } from "../dto/encryptedForm.dto";
 import { Request } from "express";
+import { EncryptedFormResponseDto } from "../dto/formResponse.dto";
 
 export interface CreateFormBody {
     form: EncryptedFormDto,
+    key?: string;
+}
+
+export interface CreateFormResponseBody {
+    formResponse: EncryptedFormResponseDto;
     key?: string;
 }
 
@@ -30,6 +36,22 @@ export interface SerializedForm {
     rawContentUrl: string;
 }
 
+export interface GetFormResponse {
+    formResponse: {
+        title: string,
+        formCid: string;
+        cid: string;
+        formId: string;
+        responseId: string;
+    },
+    formContentUrl: string;
+    responseContentUrl: string
+}
+
+export interface SerializedFormResponse {
+    formResponse: Partial<FormResponse>;
+    rawContentUrl: string;
+}
 
 
 export interface SerializedFormAnalytics {
