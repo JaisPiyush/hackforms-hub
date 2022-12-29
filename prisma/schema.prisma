@@ -86,3 +86,13 @@ model FormStats {
   formId String
   form   Form   @relation(fields: [formId], references: [id])
 }
+
+model Notification {
+  id Int @id @default(autoincrement())
+  formId String
+  userId Int
+  createdOn DateTime @default(now())
+  hasSeen Boolean @default(false)
+
+  @@index([formId, userId])
+}

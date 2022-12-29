@@ -1,4 +1,4 @@
-import { UserProfile } from "@prisma/client";
+import { Form, FormStats, UserProfile } from "@prisma/client";
 import { EncryptedFormDto } from "../dto/encryptedForm.dto";
 import { Request } from "express";
 
@@ -15,7 +15,6 @@ export interface RequestWithUser extends Request {
 
 export interface FormShareLink {
     url: string;
-    rawContentUrl:string;
 }
 
 export interface ResponseSchema<T> {
@@ -24,4 +23,21 @@ export interface ResponseSchema<T> {
         data?: T,
         err?: string
     }
+}
+
+export interface SerializedForm {
+    form: Partial<Form>,
+    rawContentUrl: string;
+}
+
+
+
+export interface SerializedFormAnalytics {
+    rawContentUrl: string;
+    stats: FormStats;
+    responses: Array<{
+        id: string,
+        cid: string,
+        url: string
+    }>
 }

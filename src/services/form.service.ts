@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Web3StorageDelegate } from "../storage/web3_storage";
 import { Response } from "express";
 
-import { RequestWithUser, ResponseSchema, UpdateFormBody } from "./types";
+import { RequestWithUser, ResponseSchema, SerializedForm, SerializedFormAnalytics, UpdateFormBody } from "./types";
 import { CreateFormBody } from "./types";
 import { FormCommonKeyService } from "./form_common_key.service";
 import { FormStatsService } from "./form_stats.service";
@@ -48,7 +48,7 @@ export class FormService {
 
     }
 
-    public async createForm(user: UserProfile, body: CreateFormBody ): Promise<ResponseSchema<Form>> {
+    public async createForm(user: UserProfile, body: CreateFormBody ): Promise<ResponseSchema<SerializedForm>> {
 
             const meta = body.form.payload.meta;
             if (body.form.header.access !== PrismaAccess.public) {
@@ -90,7 +90,10 @@ export class FormService {
             return {
                 status: 201,
                 res:{
-                    data: form
+                    data: {
+                        form: form,
+                        rawContentUrl: this.storage.getUrl(form.cid)
+                    }
                 }
             }
 
@@ -112,7 +115,7 @@ export class FormService {
         }
     }
 
-    public async updateForm(user: UserProfile, body: UpdateFormBody): Promise<ResponseSchema<Form>> {
+    public async updateForm(user: UserProfile, body: UpdateFormBody): Promise<ResponseSchema<SerializedForm>> {
         const meta = body.form.payload.meta;
         if (body.form.header.access !== PrismaAccess.public) {
             if (body.key === undefined) {
@@ -145,10 +148,120 @@ export class FormService {
         return {
             status: 200,
             res:{
-                data: form
+                data: {
+                    form: form,
+                    rawContentUrl: this.storage.getUrl(form.cid)
+                }
             }
         }
 
+    }
+
+    public async getForm(formId: string): Promise<ResponseSchema<SerializedForm>> {
+        const form = await this.prisma.form.findFirst({
+            where: {
+                id: formId
+            }
+        })
+
+        if (form === null) {
+            return {
+                status: 404,
+                res: {
+                    err: "No form found"
+                }
+            }
+        }
+        return {
+            status: 200,
+            res: {
+                data: {
+                    form: form,
+                    rawContentUrl: this.storage.getUrl(form.cid)
+                }
+            }
+        }
+    }
+
+    public async getAllFormsOfUser(userId: number): Promise<ResponseSchema<SerializedForm[]>> {
+        
+        // TODO: Add Pagination
+        const forms = await this.prisma.form.findMany({
+            where: {
+                userId: userId
+            },
+            select: {
+                id: true,
+                title: true,
+                cid: true,
+                isClosed: true,
+                createdOn: true,
+                access: true
+            }
+        });
+
+        return {
+            status: 200,
+            res:  {
+                data: forms.map((form) => {
+                    return {
+                        form: form,
+                        rawContentUrl: this.storage.getUrl(form.cid)
+                    }
+                })
+            }
+        }
+
+    }
+
+    public async getFormAnalytics(formId: string): Promise<ResponseSchema<SerializedFormAnalytics>> {
+        const formStat = await this.prisma.formStats.findFirst({
+            where: {
+                formId: formId
+            },
+            include: {
+                form: true
+            }
+        });
+
+        if (formStat === null) {
+            return {
+                status: 404,
+                res: {
+                    err: "No form found"
+                }
+            }
+        }
+
+        const formRes = await this.prisma.formResponse.findMany({
+            where: {
+                formId: formId
+            },
+            select: {
+                cid: true,
+                id: true
+            },
+            orderBy: {
+                createdOn: 'desc'
+            }
+        });
+
+        return {
+            status: 200,
+            res: {
+                data: {
+                    rawContentUrl: this.storage.getUrl(formStat.form.cid),
+                    stats: formStat,
+                    responses: formRes.map((res) => {
+                        return {
+                            id: res.id,
+                            cid: res.cid,
+                            url: this.storage.getUrl(res.cid)
+                        }
+                    })
+                }
+            }
+        }
     }
 
 
