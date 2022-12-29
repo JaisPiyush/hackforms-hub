@@ -5,6 +5,7 @@ import express from 'express';
 
 async function bootstrap() {
     const app = express();
+    app.use(express.json())
     return app;
 }
 

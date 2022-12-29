@@ -21,7 +21,7 @@ model UserProfile {
   id        Int      @id @default(autoincrement())
   createdOn DateTime @default(now())
   eoa       String   @unique @db.VarChar(80)
-  pubKey    String   @unique @db.VarChar(50)
+  pubKey    String   @unique @db.VarChar(130)
   secretKey String   @unique @db.VarChar(110)
   isEOAWeb2 Boolean  @default(false)
 
@@ -31,6 +31,11 @@ model UserProfile {
   @@index([eoa, pubKey])
 }
 
+enum Access {
+  public
+  private
+  protected
+}
 model Form {
   id          String      @id @default(uuid())
   createdOn   DateTime    @default(now())
@@ -41,7 +46,9 @@ model Form {
   userId      Int
   user        UserProfile @relation(fields: [userId], references: [id])
   ownerEOA    String      @unique @db.VarChar(80)
-  ownerpubKey String      @unique @db.VarChar(50)
+  ownerpubKey String      @unique @db.VarChar(130)
+  access  Access @default(private)
+
 
   formResponses FormResponse[]
   FormStats     FormStats[]
@@ -50,8 +57,8 @@ model Form {
 
 model FormCommonKey {
   id Int @id @default(autoincrement())
-  formId String 
-  key String @db.VarChar(300)
+  formId String @unique
+  key String @unique @db.VarChar(300)
 }
 
 model FormResponse {
@@ -61,17 +68,19 @@ model FormResponse {
   formId      String
   form        Form        @relation(fields: [formId], references: [id])
   ownerEOA    String      @unique @db.VarChar(80)
-  ownerpubKey String      @unique @db.VarChar(50)
+  ownerpubKey String      @unique @db.VarChar(130)
   cid         String      @unique @db.VarChar(64)
   userId      Int
   user        UserProfile @relation(fields: [userId], references: [id])
+  access Access @default(private)
+
 }
 
 model FormStats {
   id               Int      @id @default(autoincrement())
   createdOn        DateTime @default(now())
   updatedOn        DateTime @default(now())
-  numberOfResponse Int
+  numberOfResponse Int      @default(0)
   stats            Json
 
   formId String

@@ -16,7 +16,7 @@ function makeStorageClient(token?: string): Web3Storage {
 }
 
 export function makeFileObjectFromString(data: string, name: string, 
-    options?: FilePropertyBag): File {
+    options?: any): typeof File {
     const buffer  = Buffer.from(data);
     if (options === undefined) {
         options = {};
@@ -51,20 +51,20 @@ export class Web3StorageDelegate {
     }
 
     public async store(data: string, name: string, 
-        options?: {fileOptions?: FilePropertyBag, storageOptions?: PutOptions}) {
+        options?: {fileOptions?: any, storageOptions?: PutOptions}) {
         const file = makeFileObjectFromString(data, name, options?.fileOptions);      
         return await this.storeFile(file, options?.storageOptions);
         
     }
 
-    public async get(cid: string) {
-        const res =  await this.storageClient.get(cid);
-        const files = await res?.files();
-        if (files === undefined) {
-            throw new Web3StorageBasedError('file retrieval failed')
-        }
-        return files[0];
-    }
+    // public async get(cid: string) {
+    //     const res =  await this.storageClient.get(cid);
+    //     const files = await res?.files();
+    //     if (files === undefined) {
+    //         throw new Web3StorageBasedError('file retrieval failed')
+    //     }
+    //     return files[0];
+    // }
 
     public async getStatus(cid: string): Promise<boolean> {
         const status = await this.storageClient.status(cid);
