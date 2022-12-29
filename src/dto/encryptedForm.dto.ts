@@ -20,9 +20,9 @@ export interface EncryptedFormDto {
       meta: {
         formId: string;
         title: string;
-        startDate: string;
-        endDate: string;
-        isClosed: string;
+        startDate: number;
+        endDate: number;
+        isClosed: boolean;
       }
       // EOA
       iss: string;
@@ -36,9 +36,8 @@ export interface EncryptedFormDto {
     },
     tail: {
       hash: string,
-      // Signature using hackforms identifier
-      signature: string
-      // Singaute using EOA wallet
-      signatureWallet: string
+      // Signature using EOA
+      signature?: string
+
     }
   }
