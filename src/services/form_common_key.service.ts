@@ -1,7 +1,8 @@
-import { PrismaClient } from "@prisma/client";
-import { FormShareLink, ResponseSchema } from "./types";
-import { CommonService } from "./common.service";
+import { PrismaClient, Access as PrismaAccess, UserProfile } from "@prisma/client";
+import { FormShareLink, RequestWithUser, ResponseSchema } from "./types";
 import { Web3StorageDelegate } from "../storage/web3_storage";
+import { Express } from "express";
+import { getFormattedResponseFormSchema } from "./common.service";
 
 export class FormCommonKeyService {
     constructor(private readonly prisma: PrismaClient,
@@ -34,10 +35,34 @@ export class FormCommonKeyService {
         }
     }
 
-    public async getFormShareLink(formId:string): Promise<ResponseSchema<FormShareLink>> {
+    bindHandlers(app: Express): Express {
+        app.get('/form/share/:formId', async (req: RequestWithUser, res) => {
+            const user = req.user as UserProfile;
+            const formId = req.params.formId;
+            const shareData = await this.getFormShareLink(user.id, formId);
+            return getFormattedResponseFormSchema(res, shareData);
+        })
+        return app;
+    }
+
+    public async getFormShareLink(userId: number, formId:string): Promise<ResponseSchema<FormShareLink>> {
         const formKey = await this.prisma.formCommonKey.findFirst({
             where: {
-                formId: formId
+                AND: [{
+                    formId: formId
+                },
+                {
+                    form: {
+                        userId: userId
+                    }
+                },
+                {
+                    form: {
+                        access: PrismaAccess.private
+                    }
+                }
+            ]
+
             }
         })
 
@@ -45,7 +70,7 @@ export class FormCommonKeyService {
             return {
                 status: 404,
                 res:{
-                    err: "No form found"
+                    err: "Share link generation failed"
                 }
             }
         }

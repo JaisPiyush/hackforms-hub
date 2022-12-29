@@ -36,6 +36,7 @@ enum Access {
   private
   protected
 }
+
 model Form {
   id          String      @id @default(uuid())
   createdOn   DateTime    @default(now())
@@ -47,20 +48,20 @@ model Form {
   user        UserProfile @relation(fields: [userId], references: [id])
   ownerEOA    String      @unique @db.VarChar(80)
   ownerpubKey String      @unique @db.VarChar(130)
-  access  Access @default(private)
-
+  access      Access      @default(private)
 
   formResponses FormResponse[]
   FormStats     FormStats[]
 
   notifications Notification[]
+  FormCommonKey FormCommonKey[]
 }
 
-
 model FormCommonKey {
-  id Int @id @default(autoincrement())
-  formId String @unique
-  key String @unique @db.VarChar(300)
+  id     Int    @id @default(autoincrement())
+  formId String
+  form   Form   @relation(fields: [formId], references: [id])
+  key    String @unique @db.VarChar(300)
 }
 
 model FormResponse {
@@ -74,8 +75,7 @@ model FormResponse {
   cid         String      @unique @db.VarChar(64)
   userId      Int
   user        UserProfile @relation(fields: [userId], references: [id])
-  access Access @default(private)
-
+  access      Access      @default(private)
 }
 
 model FormStats {
@@ -90,12 +90,12 @@ model FormStats {
 }
 
 model Notification {
-  id Int @id @default(autoincrement())
-  formId String
-  form Form @relation(fields: [formId], references: [id])
-  userId Int
+  id        Int      @id @default(autoincrement())
+  formId    String
+  form      Form     @relation(fields: [formId], references: [id])
+  userId    Int
   createdOn DateTime @default(now())
-  hasSeen Boolean @default(false)
+  hasSeen   Boolean  @default(false)
 
   @@index([formId, userId])
 }
