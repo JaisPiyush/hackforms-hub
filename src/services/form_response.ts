@@ -3,6 +3,7 @@ import { Web3StorageDelegate } from "../storage/web3_storage";
 import { v4 as uuidv4 } from 'uuid';
 import { CreateFormResponseBody, GetFormResponse, ResponseSchema, SerializedFormResponse } from "./types";
 import { FormStatsService } from "./form_stats.service";
+import {Express} from 'express'
 
 
 type FormatFormResponse = (Pick<FormResponse, "cid" | "id"> & {form: Pick<Form, "title" | "cid" | "id" >})
@@ -36,6 +37,12 @@ export class FormResponseService {
                 formContentUrl: this.storage.getUrl(formRes.form.cid)
             }
         });
+    }
+
+
+
+    bindHandlers(app: Express) {
+        app.use()
     }
 
 

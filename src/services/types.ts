@@ -31,6 +31,10 @@ export interface ResponseSchema<T> {
     }
 }
 
+export interface GetFormStatusBody {
+    formIds: string[];
+}
+
 export interface SerializedForm {
     form: Partial<Form>,
     rawContentUrl: string;

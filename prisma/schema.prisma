@@ -52,6 +52,8 @@ model Form {
 
   formResponses FormResponse[]
   FormStats     FormStats[]
+
+  notifications Notification[]
 }
 
 
@@ -90,6 +92,7 @@ model FormStats {
 model Notification {
   id Int @id @default(autoincrement())
   formId String
+  form Form @relation(fields: [formId], references: [id])
   userId Int
   createdOn DateTime @default(now())
   hasSeen Boolean @default(false)

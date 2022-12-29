@@ -2,11 +2,12 @@ import { PrismaClient, UserProfile, Access as PrismaAccess, Form} from "@prisma/
 import { v4 as uuidv4 } from 'uuid';
 import { Web3StorageDelegate } from "../storage/web3_storage";
 import { Response } from "express";
-
-import { RequestWithUser, ResponseSchema, SerializedForm, SerializedFormAnalytics, UpdateFormBody } from "./types";
+import {Express} from 'express'
+import { GetFormStatusBody, RequestWithUser, ResponseSchema, SerializedForm, SerializedFormAnalytics, UpdateFormBody } from "./types";
 import { CreateFormBody } from "./types";
 import { FormCommonKeyService } from "./form_common_key.service";
 import { FormStatsService } from "./form_stats.service";
+import { getFormattedResponseFormSchema } from "./common.service";
 
 
 
@@ -34,6 +35,36 @@ export class FormService {
     }
 
 
+    bindHandlers(app: Express): Express {
+        app.post('/form/create', this.createFormHandler);
+        app.post('/form/update', this.updateFormHandler);
+        app.get('/form/:formId', async (req, res) => {
+            const formId = req.params.formId;
+            const form = await this.getForm(formId)
+            return getFormattedResponseFormSchema(res, form);
+        });
+        app.get('/form/all', async (req: RequestWithUser, res) => {
+            const userId = req.user as number;
+            const forms = await this.getAllFormsOfUser(userId);
+            return getFormattedResponseFormSchema(res, forms);
+        });
+
+        app.post('/form/status', async (req, res) => {
+            const formIds = (req.body as GetFormStatusBody).formIds;
+            const forms = await this.getFormStatus(formIds);
+            return getFormattedResponseFormSchema(res, forms);
+        });
+
+        app.get('/form/analytics/:formId', async (req: RequestWithUser, res) => {
+            const user = req.user as UserProfile;
+            const formStat = await this.getFormAnalytics(user.id, req.params.formId);
+            return getFormattedResponseFormSchema(res, formStat);
+        })
+
+        return app;
+    }
+
+
     public async createFormHandler(req: RequestWithUser, res: Response){
         try {
             const user = req.user as UserProfile;
@@ -41,7 +72,7 @@ export class FormService {
             await this.beforeCreate(req, res);
             const formRes =  await this.createForm(user, body);
             // TODO: Send Invites
-            return formRes
+            return getFormattedResponseFormSchema(res, formRes)
         }catch(e) {
             return res.status(400).send(`Error: ${(e as any).message}`);
         }
@@ -111,7 +142,7 @@ export class FormService {
             await this.beforeUpdate(req, res);
             const formRes =  await this.updateForm(user, body);
             // TODO: Send Invites
-            return formRes
+            return getFormattedResponseFormSchema(res, formRes);
         }catch(e) {
             return res.status(400).send(`Error: ${(e as any).message}`);
         }
@@ -217,7 +248,7 @@ export class FormService {
     }
 
     // API used to load not owned forms data in bulk for e.g from notifications
-    public async getFormsStatus(formIds: string[]): Promise<ResponseSchema<SerializedForm[]>> {
+    public async getFormStatus(formIds: string[]): Promise<ResponseSchema<SerializedForm[]>> {
         const forms = await this.prisma.form.findMany({
             where: {
                 id: {
@@ -246,10 +277,19 @@ export class FormService {
         }
     }
 
-    public async getFormAnalytics(formId: string): Promise<ResponseSchema<SerializedFormAnalytics>> {
+    public async getFormAnalytics(userId: number, formId: string): Promise<ResponseSchema<SerializedFormAnalytics>> {
         const formStat = await this.prisma.formStats.findFirst({
             where: {
-                formId: formId
+                AND: [
+                    {
+                        formId: formId
+                    },
+                    {
+                        form:{
+                            userId: userId
+                        }
+                    }
+                ]
             },
             include: {
                 form: true

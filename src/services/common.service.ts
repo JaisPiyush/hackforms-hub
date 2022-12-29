@@ -1,4 +1,5 @@
-import { Request } from "express";
+import { Request, Response } from "express";
+import { ResponseSchema } from "./types";
 
 export class CommonService {
 
@@ -8,4 +9,9 @@ export class CommonService {
         const url = new URL(typeof req === 'string'? req: req.url);
         return url.origin;
     }
+}
+
+
+export function getFormattedResponseFormSchema<T = any>(res: Response, schema: ResponseSchema<T>): Response {
+    return res.status(schema.status).send(schema.res);
 }
