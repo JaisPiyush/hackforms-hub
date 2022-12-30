@@ -1,9 +1,10 @@
 import { PrismaClient, UserProfile, Access as PrismaAccess, FormResponse, Form } from "@prisma/client";
 import { Web3StorageDelegate } from "../storage/web3_storage";
 import { v4 as uuidv4 } from 'uuid';
-import { CreateFormResponseBody, GetFormResponse, ResponseSchema, SerializedFormResponse } from "./types";
+import { CreateFormResponseBody, GetFormResponse, RequestWithUser, ResponseSchema, SerializedFormResponse } from "./types";
 import { FormStatsService } from "./form_stats.service";
 import {Express} from 'express'
+import { getFormattedResponseFormSchema } from "./common.service";
 
 
 type FormatFormResponse = (Pick<FormResponse, "cid" | "id"> & {form: Pick<Form, "title" | "cid" | "id" >})
@@ -42,7 +43,23 @@ export class FormResponseService {
 
 
     bindHandlers(app: Express) {
-        app.use()
+        app.get('/response/:id', async (req, res) => {
+            const id = req.params.id
+            const formResponse = await this.getFormResponses(id);
+            return getFormattedResponseFormSchema(res, formResponse);
+        });
+        app.get('/response/all', async (req: RequestWithUser, res) => {
+            const user = req.user as UserProfile;
+            const responses = await this.getAllUserFormResponses(user.id);
+            return getFormattedResponseFormSchema(res, responses);
+        });
+        app.post('/response', async (req: RequestWithUser, res) => {
+            const user = req.user as UserProfile;
+            const body = req.body as CreateFormResponseBody;
+            const form = await this.createResponse(user, body);
+            return getFormattedResponseFormSchema(res, form)
+        })
+        return app;
     }
 
 

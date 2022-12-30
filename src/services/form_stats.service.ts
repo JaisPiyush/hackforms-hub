@@ -1,6 +1,5 @@
-import { Form, FormResponse, PrismaClient } from "@prisma/client";
+import { Form, PrismaClient } from "@prisma/client";
 import { ResponseSchema } from "./types";
-import { FormStatsDto } from "../dto/formStats.dto";
 
 
 export class FormStatsService {

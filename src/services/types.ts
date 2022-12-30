@@ -15,8 +15,8 @@ export interface CreateFormResponseBody {
 
 export interface UpdateFormBody extends CreateFormBody {}
 
-export interface RequestWithUser extends Request {
-    user?: Partial<UserProfile>
+export type RequestWithUser = Request & {
+    user?: UserProfile
 }
 
 export interface FormShareLink {

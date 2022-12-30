@@ -44,7 +44,7 @@ export class FormService {
             return getFormattedResponseFormSchema(res, form);
         });
         app.get('/form/all', async (req: RequestWithUser, res) => {
-            const userId = req.user as number;
+            const userId = req.user?.id as number;
             const forms = await this.getAllFormsOfUser(userId);
             return getFormattedResponseFormSchema(res, forms);
         });
