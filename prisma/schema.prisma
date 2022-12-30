@@ -46,8 +46,8 @@ model Form {
   isClosed    Boolean     @default(false)
   userId      Int
   user        UserProfile @relation(fields: [userId], references: [id])
-  ownerEOA    String      @unique @db.VarChar(80)
-  ownerpubKey String      @unique @db.VarChar(130)
+  ownerEOA    String      @db.VarChar(80)
+  ownerpubKey String      @db.VarChar(130)
   access      Access      @default(private)
 
   formResponses FormResponse[]
@@ -70,8 +70,8 @@ model FormResponse {
   updatedOn   DateTime    @default(now())
   formId      String
   form        Form        @relation(fields: [formId], references: [id])
-  ownerEOA    String      @unique @db.VarChar(80)
-  ownerpubKey String      @unique @db.VarChar(130)
+  ownerEOA    String      @db.VarChar(80)
+  ownerpubKey String      @db.VarChar(130)
   cid         String      @unique @db.VarChar(64)
   userId      Int
   user        UserProfile @relation(fields: [userId], references: [id])

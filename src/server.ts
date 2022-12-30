@@ -26,6 +26,18 @@ const formResponseService = new FormResponseService(prisma, storage, formStatsSe
 const formService = new FormService(prisma, storage, formCommonKeyService, formStatsService)
 
 
+export const services = {
+    prisma,
+    commonService,
+    storage,
+    jWTAuthenticationService,
+    formCommonKeyService,
+    formStatsService,
+    notificationService,
+    formResponseService,
+    formService
+}
+
 const app = express();
 app.use(express.json())
 formService.bindHandlers(app);

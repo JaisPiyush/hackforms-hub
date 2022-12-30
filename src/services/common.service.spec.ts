@@ -2,6 +2,7 @@ import { CommonService } from "./common.service"
 
 
 describe("Tessing Common service", () => {
+    let commonService = new CommonService();
 
     test("Testing getRootUrl", () => {
         let fixtures = [
@@ -10,7 +11,7 @@ describe("Tessing Common service", () => {
         ]
 
         for(const fixture of fixtures) {
-            expect(CommonService.getRootUrl(fixture[0])).toEqual(fixture[1])
+            expect(commonService.getRootUrl(fixture[0])).toEqual(fixture[1])
         }
     })
 })
