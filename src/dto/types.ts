@@ -16,8 +16,10 @@ export interface EncryptedSchemaDto<T> {
       data: string;
       // public meta data about the data
       meta: T
-      // EOA
+      // ECDSA used for encryption of key
       iss: string;
+      // EOA
+      owner: string;
       // Record containing Hackform profile pubKey along with encryoted symm key
       // When using 
       subRecord: Record<string, string>;

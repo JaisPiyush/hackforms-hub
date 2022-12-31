@@ -130,6 +130,8 @@ export class FormResponseService {
     public async createResponse(user: UserProfile, body: CreateFormResponseBody): Promise<ResponseSchema<SerializedFormResponse>>{
         const formResponseId = this.generateFormResponseId();
         body.formResponse.payload.meta.responseId = formResponseId;
+        body.formResponse.payload.iss = user.pubKey;
+        body.formResponse.payload.owner = user.eoa;
         const meta = body.formResponse.payload.meta;
         const name = `${formResponseId}.json`
         const cid = await this.storage.store(JSON.stringify(formResponseId), name);

@@ -59,8 +59,7 @@ export interface SerializedFormResponse {
 
 
 export interface SerializedFormAnalytics {
-    rawContentUrl: string;
-    stats: FormStats;
+    numberOfResponse: number;
     responses: Array<{
         id: string,
         cid: string,

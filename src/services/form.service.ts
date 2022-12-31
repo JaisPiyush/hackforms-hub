@@ -83,6 +83,8 @@ export class FormService {
             
             const formId = this.generateFormId();
             body.form.payload.meta.formId = formId;
+            body.form.payload.iss = user.pubKey;
+            body.form.payload.owner = user.eoa;
             const meta = body.form.payload.meta;
             if (body.form.header.access !== PrismaAccess.public) {
                 if (body.key === undefined) {
@@ -149,6 +151,8 @@ export class FormService {
     }
 
     public async updateForm(user: UserProfile, body: UpdateFormBody): Promise<ResponseSchema<SerializedForm>> {
+        body.form.payload.iss = user.pubKey;
+        body.form.payload.owner = user.eoa;
         const meta = body.form.payload.meta;
         if (body.form.header.access !== PrismaAccess.public) {
             if (body.key === undefined) {
@@ -291,8 +295,8 @@ export class FormService {
                     }
                 ]
             },
-            include: {
-                form: true
+            select: {
+                numberOfResponse: true
             }
         });
 
@@ -322,8 +326,7 @@ export class FormService {
             status: 200,
             res: {
                 data: {
-                    rawContentUrl: this.storage.getUrl(formStat.form.cid),
-                    stats: formStat,
+                   numberOfResponse: formStat.numberOfResponse,
                     responses: formRes.map((res) => {
                         return {
                             id: res.id,
