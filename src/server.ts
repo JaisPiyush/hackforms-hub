@@ -10,7 +10,7 @@ import { JWTAuthenticationService } from "./services/auth.service";
 import { CommonService } from "./services/common.service";
 import {FormStatsService} from './services/form_stats.service'
 import { NotificationService } from "./services/notification.service";
-import { FormResponseService } from "./services/form_response";
+import { FormResponseService } from "./services/form_response.service";
 import { Web3StorageDelegate } from "./storage/web3_storage";
 import { FormCommonKeyService } from "./services/form_common_key.service";
 import { FormService } from "./services/form.service";
