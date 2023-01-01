@@ -80,6 +80,14 @@ export class UserProfileService {
         open.post('/login', async (req, res) => {
             await this.login(req, res)
         });
+        open.post('/login/eoa', async (req, res) => {
+            const exists = await this.eoaExists(req.body.eoa);
+            return res.status(200).send({
+                data: {
+                    exists
+                }
+            })
+        })
         api.post('/user/ident', async (req: RequestWithUser, res) => {
             await this.updateIdentifiers(req, res);
         })
