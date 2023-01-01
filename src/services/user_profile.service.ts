@@ -20,6 +20,14 @@ interface LoginArgs {
     secretKey?: string;
 }
 
+interface UpdateIdentifier {
+    // of current secret key using previous secret key
+    signature: string;
+    publicKey: string;
+    secretKey: string;
+}
+
+const externalAuthService = new ExternalLoginAuthorizationService();
 export class UserProfileService {
 
 
@@ -29,7 +37,7 @@ export class UserProfileService {
         return await this.prisma.userProfile.count({where: {eoa: eoa}}) !== 0;
     }
 
-    public async updateIdentifiers(userId: number, pubKey: string, secretKey: string) {
+    public async _updateIdentifiers(userId: number, pubKey: string, secretKey: string) {
         return await this.prisma.userProfile.update({
             where: {id: userId}, 
             data: {
@@ -72,11 +80,27 @@ export class UserProfileService {
         open.post('/login', async (req, res) => {
             await this.login(req, res)
         });
-        // api.post('/user', (Req: RequestWithUser, res) => {})
+        api.post('/user/ident', async (req: RequestWithUser, res) => {
+            await this.updateIdentifiers(req, res);
+        })
     }
 
+    public async updateIdentifiers(req: RequestWithUser, res: Response) {
+        
+        const user = req.user as UserProfile;
+        const body = req.body as UpdateIdentifier;
+        const address = externalAuthService.getAddressFromPublicKey(body.publicKey);
+        if (! await externalAuthService.verifySignature(address, body.secretKey, body.signature)) {
+            return res.status(401).send('Signature verification failed');
+        }
+        await this._updateIdentifiers(user.id, body.publicKey, body.secretKey)
+        return res.status(201);
+
+    }
+
+
     public async login(req: Request, res: Response) {
-        const externalAuthService = new ExternalLoginAuthorizationService();
+        // const externalAuthService = new ExternalLoginAuthorizationService();
         if (req.headers['authorization']) {
             return jwtAuthService._authenticateToken(
                 req, res, 

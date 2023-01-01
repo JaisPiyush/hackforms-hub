@@ -80,10 +80,18 @@ export class ExternalLoginAuthorizationService {
         return (jwtDecoded as any).payload.wallets[0].public_key === appPubKey;
     }
 
+    getAddressFromPublicKey(address: string) {
+        return EthCrypto.publicKey.toAddress(address)
+    }
+
+    async verifySignature(address: string, message: string, signature: string) {
+        const prefixedMessage = `\x19Ethereum Signed Message:\n${message.length}${message}`
+        return (await EthCrypto.recover(signature, EthCrypto.hash.keccak256(prefixedMessage))) === address;
+    }
+
     async authenticationUnstoppableDomainCredentials(eoa: string, message: string, signature: string) {
         message = atob(message);
-        const prefixedMessage = `\x19Ethereum Signed Message:\n${message.length}${message}`
-        return (await EthCrypto.recover(signature, EthCrypto.hash.keccak256(prefixedMessage))) === eoa;
+        return await this.verifySignature(eoa, message, signature);
     }
 
 
