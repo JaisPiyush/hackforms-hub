@@ -13,7 +13,7 @@ export class JWTAuthenticationService {
 
     constructor(private readonly prisma: PrismaClient){}
 
-    public generateRandomKey(): string {
+    public static generateRandomKey(): string {
         return randomBytes(64).toString('hex');
     }
 
@@ -21,14 +21,15 @@ export class JWTAuthenticationService {
         return process.env.JWT_TOKEN;
     }
 
-    public _generateAccessToken(claim: Record<string, string> | string, key: string, expiresIn: string) {
+    public _generateAccessToken(claim: Record<string, string> | string, key: string, expiresIn: number) {
         if (key === undefined){
             throw Error('JWT encryption key is not set')
         }
-        return jwt.sign(claim, key, {expiresIn});
+        //TODO: add expires in
+        return jwt.sign(claim, key);
     }
 
-    public generateAccessToken(userId: string, expiresIn: string = '10d') {
+    public generateAccessToken(userId: string, expiresIn = 864000) {
         return this._generateAccessToken(userId, this.getKey() as string, expiresIn);
     }
 
@@ -74,11 +75,15 @@ export class ExternalLoginAuthorizationService {
                     jwks,
                     {algorithms: ['ES256']}
                 );
-        return (jwtDecoded as any).wallets[0].public_key === appPubKey;
+            console.log((jwtDecoded as any).payload.wallets[0].public_key);
+            
+        return (jwtDecoded as any).payload.wallets[0].public_key === appPubKey;
     }
 
     async authenticationUnstoppableDomainCredentials(eoa: string, message: string, signature: string) {
-        return (await EthCrypto.recover(signature, message)) === eoa;
+        message = atob(message);
+        const prefixedMessage = `\x19Ethereum Signed Message:\n${message.length}${message}`
+        return (await EthCrypto.recover(signature, EthCrypto.hash.keccak256(prefixedMessage))) === eoa;
     }
 
 

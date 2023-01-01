@@ -43,8 +43,9 @@ export const services = {
 
 const app = express();
 app.use(express.json())
-app.get('/', open);
-app.get('/api', api)
+userProfileService.getRouter()
+app.use('/', open);
+app.use('/api', api)
 // formService.bindHandlers(app);
 // formResponseService.bindHandlers(app);
 // notificationService.bindHandlers(app);

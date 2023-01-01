@@ -1,8 +1,9 @@
 import { PrismaClient, UserProfile } from "@prisma/client";
 import { Request, Response } from "express";
-import { ExternalLoginAuthorizationService, JWTAuthenticationService } from "./auth.service";
+import { ExternalLoginAuthorizationService } from "./auth.service";
 
-import { jwtAuthService, open } from "../routers";
+import { api, jwtAuthService, open } from "../routers";
+import { RequestWithUser } from "./types";
 interface LoginArgs {
     route: "ud" | "wa",
     eoa: string;
@@ -49,21 +50,29 @@ export class UserProfileService {
         });
     }
 
-    public async updateEOA(userId: number, eoa: string, isEOAWeb2: boolean) {
+    public async createOrUpdateUser(eoa: string, pubKey: string, secretKey: string, isEOAWeb2: boolean, userId?: number) {
+        if (userId === undefined) {
+            return await this.createUser(eoa, pubKey, secretKey, isEOAWeb2);
+        }
         return await this.prisma.userProfile.update({
-            where:{
+            where: {
                 id: userId
             },
             data: {
                 eoa: eoa,
-                isEOAWeb2
+                pubKey: pubKey,
+                secretKey: secretKey,
+                isEOAWeb2: isEOAWeb2
             }
         })
     }
 
 
     getRouter() {
-        open.get('/login', this.login);
+        open.post('/login', async (req, res) => {
+            await this.login(req, res)
+        });
+        // api.post('/user', (Req: RequestWithUser, res) => {})
     }
 
     public async login(req: Request, res: Response) {
@@ -94,6 +103,14 @@ export class UserProfileService {
             }
             data.pubKey = body.pubKey;
             data.secretKey = body.secretKey;
+        }else {
+            const user = await this.prisma.userProfile.findFirst({where: {eoa: data.eoa} });
+            return res.status(200).send({
+                data: {
+                    user: user,
+                    token: jwtAuthService.generateAccessToken(user?.id.toString() as string)
+                }
+            })
         }
 
 
