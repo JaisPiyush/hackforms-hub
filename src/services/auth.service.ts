@@ -4,6 +4,7 @@ import {Request, Response, NextFunction} from  'express'
 import { PrismaClient, UserProfile } from '@prisma/client';
 import * as jose from 'jose';
 import { RequestWithUser } from './types';
+import * as EthCrypto from 'eth-crypto';
 
 
 
@@ -31,7 +32,7 @@ export class JWTAuthenticationService {
         return this._generateAccessToken(userId, this.getKey() as string, expiresIn);
     }
 
-    public _authenticateToken(req: Request, res: Response, next: NextFunction, key: string) {
+    public _authenticateToken(req: Request, res: Response, callback: () => void, key: string) {
         const header = req.headers['authorization'];
         const token = header && header.split(' ')[1];
         
@@ -47,7 +48,7 @@ export class JWTAuthenticationService {
                 return res.status(404).send("No user found associated with the credentials")
             }
             (req as any).user = user;
-            next()
+            callback()
         })
     }
 
@@ -67,18 +68,18 @@ export class JWTAuthenticationService {
 
 export class ExternalLoginAuthorizationService {
 
-    // async authenticateWeb3AuthCredentials(req: Request, res: Response, next: NextFunction): Promise<boolean> {
-    //     const idToken = (req.headers && req.headers.authorization) && req.headers.authorization.split(' ')[1];
+    async authenticateWeb3AuthCredentials(idToken: string, appPubKey: string): Promise<boolean> {
+        const jwks = jose.createRemoteJWKSet(new URL("https://api.openlogin.com/jwks"));
+        const jwtDecoded = await jose.jwtVerify(idToken, 
+                    jwks,
+                    {algorithms: ['ES256']}
+                );
+        return (jwtDecoded as any).wallets[0].public_key === appPubKey;
+    }
 
-    //     if (idToken == null) return false;
-    //     const appPubKey = req.body.appPubKey;
-        
-    //     // Get the JWK set used to sign the jWT issued by Web3Auth
-    //     const jwks = jose.createRemoteJWKSet(new URL('https://api.openlogin.com/jwks'));
+    async authenticationUnstoppableDomainCredentials(eoa: string, message: string, signature: string) {
+        return (await EthCrypto.recover(signature, message)) === eoa;
+    }
 
-    //     const jwtDecoded = await jose.jwtVerify(idToken, jwks, {algorithms: ['ES256']});
-    //     // TODO: Need to check web3auth live
-    //     // return (jwtDecoded.payload as any).wallets[0]
-    // }
 
 }
