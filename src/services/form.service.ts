@@ -74,7 +74,9 @@ export class FormService {
             // TODO: Send Invites
             return getFormattedResponseFormSchema(res, formRes)
         }catch(e) {
-            return res.status(400).send(`Error: ${(e as any).message}`);
+            return res.status(200).send({
+                err: `Error: ${(e as any).message}`
+            });
         }
 
     }
@@ -146,7 +148,9 @@ export class FormService {
             // TODO: Send Invites
             return getFormattedResponseFormSchema(res, formRes);
         }catch(e) {
-            return res.status(400).send(`Error: ${(e as any).message}`);
+            return res.status(200).send({
+                err: `Error: ${(e as any).message}`
+            });
         }
     }
 

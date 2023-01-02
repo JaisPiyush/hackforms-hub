@@ -99,7 +99,9 @@ export class UserProfileService {
         const body = req.body as UpdateIdentifier;
         const address = externalAuthService.getAddressFromPublicKey(body.publicKey);
         if (! await externalAuthService.verifySignature(address, body.secretKey, body.signature)) {
-            return res.status(401).send('Signature verification failed');
+            return res.status(200).send({
+                    err: 'Signature verification failed'
+            });
         }
         await this._updateIdentifiers(user.id, body.publicKey, body.secretKey)
         return res.status(201);
@@ -113,6 +115,7 @@ export class UserProfileService {
             return jwtAuthService._authenticateToken(
                 req, res, 
                 () => {
+                    
                     const user = (req as any).user as UserProfile
                     return res.status(200).send({
                         data: {
@@ -131,7 +134,9 @@ export class UserProfileService {
 
         if (!await this.eoaExists(data.eoa)) {
             if (body.pubKey === undefined || body.secretKey === undefined){
-                return res.status(400).send('Bad request')
+                return res.status(400).send({
+                    err: 'Bad request'
+                })
             }
             data.pubKey = body.pubKey;
             data.secretKey = body.secretKey;
@@ -153,7 +158,9 @@ export class UserProfileService {
                 body.wa.idToken,
                 body.wa.appPubKey
             )) {
-                return res.status(401).send('Authorization failed')
+                return res.status(401).send({
+                    err: 'Authorization failed'
+                })
             }
             data.isEOAWeb2 = body.wa.isEOAWeb2;
         }else {
@@ -162,7 +169,9 @@ export class UserProfileService {
                 body.ud.message,
                 body.ud.signature
             )){
-                return res.status(401).send('Authorization failed')
+                return res.status(401).send({
+                    err: 'Authorization failed'
+                })
             }
             data.isEOAWeb2 = false
         }

@@ -17,9 +17,10 @@ function getEncryptedForm(user: UserProfile) {
                 endDate: Date.now() + 200000,
                 startDate: Date.now(),
                 isClosed: false,
-                title: 'Testing public form'
+                title: 'Testing public form',
             },
-            iss: user.eoa,
+            iss: user.pubKey,
+            owner: user.eoa,
             subRecord: {},
             inviteList: []
         },

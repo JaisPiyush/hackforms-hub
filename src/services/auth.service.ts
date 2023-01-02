@@ -46,7 +46,9 @@ export class JWTAuthenticationService {
             }
             const user = await this.prisma.userProfile.findFirst({where: {id: parseInt(userId as string)}})
             if (user == null) {
-                return res.status(404).send("No user found associated with the credentials")
+                return res.status(200).send({
+                    err: "No user found associated with the credentials"
+                })
             }
             (req as any).user = user;
             callback()
@@ -59,7 +61,9 @@ export class JWTAuthenticationService {
 
     public getUserFromRequest(req: RequestWithUser, res: Response) {
         if (req.user === undefined) {
-            return res.status(401).send("Authentication of user failed. Try to login again")
+            return res.status(200).send({
+                err: "Authentication of user failed. Try to login again"
+            })
         }
         return req.user;
     }
