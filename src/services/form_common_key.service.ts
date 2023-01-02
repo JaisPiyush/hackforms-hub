@@ -3,6 +3,7 @@ import { FormShareLink, RequestWithUser, ResponseSchema } from "./types";
 import { Web3StorageDelegate } from "../storage/web3_storage";
 import { Express } from "express";
 import { getFormattedResponseFormSchema } from "./common.service";
+import { api } from "../routers";
 
 export class FormCommonKeyService {
     constructor(private readonly prisma: PrismaClient,
@@ -35,14 +36,13 @@ export class FormCommonKeyService {
         }
     }
 
-    bindHandlers(app: Express): Express {
-        app.get('/form/share/:formId', async (req: RequestWithUser, res) => {
+    bindHandlers() {
+        api.get('/form/share/:formId', async (req: RequestWithUser, res) => {
             const user = req.user as UserProfile;
             const formId = req.params.formId;
             const shareData = await this.getFormShareLink(user.id, formId);
             return getFormattedResponseFormSchema(res, shareData);
-        })
-        return app;
+        });
     }
 
     public async getFormShareLink(userId: number, formId:string): Promise<ResponseSchema<FormShareLink>> {

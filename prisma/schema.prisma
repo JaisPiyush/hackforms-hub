@@ -22,7 +22,7 @@ model UserProfile {
   createdOn DateTime @default(now())
   eoa       String   @unique @db.VarChar(80)
   pubKey    String   @unique @db.VarChar(130)
-  secretKey String   @unique @db.VarChar(110)
+  secretKey String   @unique @db.VarChar(210)
   isEOAWeb2 Boolean  @default(false)
 
   forms         Form[]

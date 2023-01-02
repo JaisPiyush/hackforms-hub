@@ -16,7 +16,8 @@ import { FormCommonKeyService } from "./services/form_common_key.service";
 import { FormService } from "./services/form.service";
 import { api, open, prisma } from "./routers";
 import { UserProfileService } from "./services/user_profile.service";
-
+import morgan from 'morgan'
+import cors from 'cors';
 
 const commonService = new CommonService();
 const storage = new Web3StorageDelegate()
@@ -42,13 +43,22 @@ export const services = {
 }
 
 const app = express();
+app.use(morgan('dev'))
+app.use(cors({
+    origin: '*'
+}))
 app.use(express.json())
-userProfileService.getRouter()
+app.options('*',cors())
+
+
+userProfileService.binHandlers()
+formService.bindHandlers();
+formResponseService.bindHandlers();
+notificationService.bindHandlers();
+
 app.use('/', open);
 app.use('/api', api)
-// formService.bindHandlers(app);
-// formResponseService.bindHandlers(app);
-// notificationService.bindHandlers(app);
+
 
 
 

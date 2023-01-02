@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "UserProfile" ALTER COLUMN "secretKey" SET DATA TYPE VARCHAR(210);

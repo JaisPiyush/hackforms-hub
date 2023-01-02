@@ -2,6 +2,7 @@ import { Notification, PrismaClient, UserProfile } from "@prisma/client";
 import { RequestWithUser, ResponseSchema } from "./types";
 import { Express } from "express";
 import { getFormattedResponseFormSchema } from "./common.service";
+import { api } from "../routers";
 
 export class NotificationService {
     constructor(private readonly prisma: PrismaClient) {}
@@ -21,19 +22,18 @@ export class NotificationService {
     }
 
 
-    bindHandlers(app: Express): Express {
-        app.get('/notifications', async (req: RequestWithUser, res) => {
+    bindHandlers() {
+        api.get('/notifications', async (req: RequestWithUser, res) => {
             const user = req.user as UserProfile;
             const notifs = await this.getUsersNotifications(user.id);
             return getFormattedResponseFormSchema(res, notifs);
         });
-        app.delete('/notifications/:id', async (req: RequestWithUser, res) => {
+        api.delete('/notifications/:id', async (req: RequestWithUser, res) => {
             const user = req.user as UserProfile;
             const id = parseInt(req.params.id);
             const status = await this.removeNotification(user.id, id);
             return getFormattedResponseFormSchema(res, status);
-        })
-        return app;
+        });
     }
 
     

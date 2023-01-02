@@ -8,6 +8,7 @@ import { CreateFormBody } from "./types";
 import { FormCommonKeyService } from "./form_common_key.service";
 import { FormStatsService } from "./form_stats.service";
 import { getFormattedResponseFormSchema } from "./common.service";
+import { api } from "../routers";
 
 
 
@@ -35,33 +36,35 @@ export class FormService {
     }
 
 
-    bindHandlers(app: Express): Express {
-        app.post('/form/create', this.createFormHandler);
-        app.post('/form/update', this.updateFormHandler);
-        app.get('/form/:formId', async (req, res) => {
+    bindHandlers() {
+        api.post('/form/create', async (req, res) => {
+            return this.createFormHandler(req, res);
+        });
+        api.post('/form/update', async (req, res) => {
+            return this.updateFormHandler(req, res);
+        });
+        api.get('/form/:formId', async (req, res) => {
             const formId = req.params.formId;
             const form = await this.getForm(formId)
             return getFormattedResponseFormSchema(res, form);
         });
-        app.get('/form/all', async (req: RequestWithUser, res) => {
+        api.get('/form/all', async (req: RequestWithUser, res) => {
             const userId = req.user?.id as number;
             const forms = await this.getAllFormsOfUser(userId);
             return getFormattedResponseFormSchema(res, forms);
         });
 
-        app.post('/form/status', async (req, res) => {
+        api.post('/form/status', async (req, res) => {
             const formIds = (req.body as GetFormStatusBody).formIds;
             const forms = await this.getFormStatus(formIds);
             return getFormattedResponseFormSchema(res, forms);
         });
 
-        app.get('/form/analytics/:formId', async (req: RequestWithUser, res) => {
+        api.get('/form/analytics/:formId', async (req: RequestWithUser, res) => {
             const user = req.user as UserProfile;
             const formStat = await this.getFormAnalytics(user.id, req.params.formId);
             return getFormattedResponseFormSchema(res, formStat);
-        })
-
-        return app;
+        });
     }
 
 

@@ -76,7 +76,7 @@ export class UserProfileService {
     }
 
 
-    getRouter() {
+    binHandlers() {
         open.post('/login', async (req, res) => {
             await this.login(req, res)
         });
@@ -128,13 +128,19 @@ export class UserProfileService {
             )
         }
         const body = req.body as LoginArgs;
+        if (body.eoa === undefined || body.route === undefined) {
+            return res.status(200).send({
+                err: "No data provided"
+            })
+        }
         let data = {
-            eoa: body.eoa
+            eoa: body.eoa,
+            isEOAWeb2: false
         } as any;
 
         if (!await this.eoaExists(data.eoa)) {
             if (body.pubKey === undefined || body.secretKey === undefined){
-                return res.status(400).send({
+                return res.status(200).send({
                     err: 'Bad request'
                 })
             }
@@ -150,32 +156,36 @@ export class UserProfileService {
             })
         }
 
-
-        if (body.route === 'wa') {
+        //TODO: Add serve side verification
+        // if (body.route === 'wa') {
             
             
-            if (! await externalAuthService.authenticateWeb3AuthCredentials(
-                body.wa.idToken,
-                body.wa.appPubKey
-            )) {
-                return res.status(401).send({
-                    err: 'Authorization failed'
-                })
-            }
-            data.isEOAWeb2 = body.wa.isEOAWeb2;
-        }else {
-            if (!await externalAuthService.authenticationUnstoppableDomainCredentials(
-                body.eoa,
-                body.ud.message,
-                body.ud.signature
-            )){
-                return res.status(401).send({
-                    err: 'Authorization failed'
-                })
-            }
-            data.isEOAWeb2 = false
-        }
+        //     if (! await externalAuthService.authenticateWeb3AuthCredentials(
+        //         body.wa.idToken,
+        //         body.wa.appPubKey
+        //     )) {
+        //         return res.status(200).send({
+        //             err: 'Authorization failed'
+        //         })
+        //     }
+        //     data.isEOAWeb2 = body.wa.isEOAWeb2;
+        // }
+        // if(body.route === 'ud'){
+        //     if (!await externalAuthService.authenticationUnstoppableDomainCredentials(
+        //         body.eoa,
+        //         body.ud.message,
+        //         body.ud.signature
+        //     )){
+        //         return res.status(200).send({
+        //             err: 'Authorization failed'
+        //         })
+        //     }
+        //     data.isEOAWeb2 = false
+        // }
 
+        console.log(data.secretKey);
+        console.log(data.secretKey.length);
+        
         const user = await this.createUser(
             data.eoa, data.pubKey, data.secretKey, data.isEOAWeb2
         );
