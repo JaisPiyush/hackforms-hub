@@ -5,7 +5,7 @@ import { CreateFormResponseBody, GetFormResponse, RequestWithUser, ResponseSchem
 import { FormStatsService } from "./form_stats.service";
 import {Express} from 'express'
 import { getFormattedResponseFormSchema } from "./common.service";
-import { api } from "../routers";
+import { api, open } from "../routers";
 
 
 type FormatFormResponse = (Pick<FormResponse, "cid" | "id"> & {form: Pick<Form, "title" | "cid" | "id" >})
@@ -44,7 +44,7 @@ export class FormResponseService {
 
 
     bindHandlers() {
-        api.get('/response/:id', async (req, res) => {
+        open.get('/api/response/:id', async (req, res) => {
             const id = req.params.id
             const formResponse = await this.getFormResponses(id);
             return getFormattedResponseFormSchema(res, formResponse);

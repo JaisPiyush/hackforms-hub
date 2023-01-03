@@ -8,7 +8,9 @@ import { CreateFormBody } from "./types";
 import { FormCommonKeyService } from "./form_common_key.service";
 import { FormStatsService } from "./form_stats.service";
 import { getFormattedResponseFormSchema } from "./common.service";
-import { api } from "../routers";
+import { api, open } from "../routers";
+
+
 
 
 
@@ -43,7 +45,7 @@ export class FormService {
         api.post('/form/update', async (req, res) => {
             return this.updateFormHandler(req, res);
         });
-        api.get('/form/:formId', async (req, res) => {
+        open.get('/api/form/:formId', async (req, res) => {
             const formId = req.params.formId;
             const form = await this.getForm(formId)
             return getFormattedResponseFormSchema(res, form);
@@ -54,7 +56,7 @@ export class FormService {
             return getFormattedResponseFormSchema(res, forms);
         });
 
-        api.post('/form/status', async (req, res) => {
+        open.post('/api/form/status', async (req, res) => {
             const formIds = (req.body as GetFormStatusBody).formIds;
             const forms = await this.getFormStatus(formIds);
             return getFormattedResponseFormSchema(res, forms);
@@ -180,7 +182,7 @@ export class FormService {
             data:{
                 cid: cid,
                 title: meta.title,
-                updatedOn: new Date(Date.now()).toDateString(),
+                updatedOn: new Date(Date.now()),
                 ownerpubKey: user.pubKey,
                 access: body.form.header.access
             }
