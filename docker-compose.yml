@@ -13,7 +13,6 @@ services:
       POSTGRES_DB: tests
   live_db:
     image: postgres:latest
-    restart: always
     container_name: hackforms-hub-integration-live-prisma
     ports:
       - 5433:5432

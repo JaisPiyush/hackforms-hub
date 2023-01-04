@@ -60,6 +60,13 @@ export class FormResponseService {
             const form = await this.createResponse(user, body);
             return getFormattedResponseFormSchema(res, form)
         })
+
+        api.get('/response/formId/:formId', async (req: RequestWithUser, res) => {
+            const user = req.user as UserProfile;
+            const  formId = req.params.formId
+            const formResponse = await this.getUserResponseForFormId(user.id, formId);
+            return getFormattedResponseFormSchema(res, formResponse);
+        })
         
     }
 
@@ -90,6 +97,47 @@ export class FormResponseService {
         }
     }
 
+
+    public async getUserResponseForFormId(userId:number, formId: string): Promise<ResponseSchema<GetFormResponse>> {
+        const formResponse = await this.prisma.formResponse.findFirst({
+            where: {
+                AND: [
+                    {
+                        formId: formId
+                    },{
+                        userId: userId
+                    }
+                ]
+            },
+            select: {
+                id: true,
+                cid: true,
+                form: {
+                    select: {
+                        cid: true,
+                        id: true,
+                        title: true
+                    }
+                    
+                }
+            }
+        });
+        if (formResponse === null) {
+            return {
+                status: 404,
+                res: {
+                    err: "No form response found"
+                }
+            }
+        }
+        return {
+            status: 200,
+            res:{
+                data: this.formateFormResponses([formResponse])[0]
+            }
+        }
+
+    }
 
     public async getFormResponses(responseId: string): Promise<ResponseSchema<GetFormResponse>> {
         const formResponse = await this.prisma.formResponse.findFirst({
@@ -133,9 +181,8 @@ export class FormResponseService {
         body.formResponse.payload.meta.responseId = formResponseId;
         body.formResponse.payload.iss = user.pubKey;
         body.formResponse.payload.owner = user.eoa;
-        const meta = body.formResponse.payload.meta;
         const name = `${formResponseId}.json`
-        const cid = await this.storage.store(JSON.stringify(formResponseId), name);
+        const cid = await this.storage.store(JSON.stringify(body.formResponse), name);
         const formResponse = await this.prisma.formResponse.create({
             data: {
                 id: formResponseId,
