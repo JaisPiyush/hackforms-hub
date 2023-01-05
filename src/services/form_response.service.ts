@@ -49,7 +49,7 @@ export class FormResponseService {
             const formResponse = await this.getFormResponses(id);
             return getFormattedResponseFormSchema(res, formResponse);
         });
-        api.get('/response/all', async (req: RequestWithUser, res) => {
+        api.get('/all/response', async (req: RequestWithUser, res) => {
             const user = req.user as UserProfile;
             const responses = await this.getAllUserFormResponses(user.id);
             return getFormattedResponseFormSchema(res, responses);

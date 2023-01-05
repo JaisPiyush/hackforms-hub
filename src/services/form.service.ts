@@ -45,12 +45,8 @@ export class FormService {
         api.post('/form/update', async (req, res) => {
             return this.updateFormHandler(req, res);
         });
-        open.get('/api/form/:formId', async (req, res) => {
-            const formId = req.params.formId;
-            const form = await this.getForm(formId)
-            return getFormattedResponseFormSchema(res, form);
-        });
-        api.get('/form/all', async (req: RequestWithUser, res) => {
+        
+        api.get('/all/form', async (req: RequestWithUser, res) => {
             const userId = req.user?.id as number;
             const forms = await this.getAllFormsOfUser(userId);
             return getFormattedResponseFormSchema(res, forms);
@@ -60,6 +56,11 @@ export class FormService {
             const formIds = (req.body as GetFormStatusBody).formIds;
             const forms = await this.getFormStatus(formIds);
             return getFormattedResponseFormSchema(res, forms);
+        });
+        open.get('/api/form/:formId', async (req, res) => {
+            const formId = req.params.formId;
+            const form = await this.getForm(formId)
+            return getFormattedResponseFormSchema(res, form);
         });
 
         api.get('/form/analytics/:formId', async (req: RequestWithUser, res) => {

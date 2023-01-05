@@ -16,8 +16,11 @@ services:
     container_name: hackforms-hub-integration-live-prisma
     ports:
       - 5433:5432
+    volumes:
+      - data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: prisma
       POSTGRES_PASSWORD: prisma
       POSTGRES_DB: tests
-    
+volumes:
+  data:
