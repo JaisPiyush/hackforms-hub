@@ -34,7 +34,7 @@
     "web3.storage": "^4.4.0"
   },
   "scripts": {
-    "build": "yarn tsc",
+    "build": "yarn tsc && yarn run migrate",
     "start": "nodemon src/index.ts",
     "dev": "concurrently \"yarn tsc --watch \" \"nodemon -q src/index.ts\"",
     "docker:up": "docker-compose up -d test_db",
