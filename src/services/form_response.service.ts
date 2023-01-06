@@ -49,6 +49,11 @@ export class FormResponseService {
             const formResponse = await this.getFormResponses(id);
             return getFormattedResponseFormSchema(res, formResponse);
         });
+        open.get('/api/response/count/:formId', async (req, res) => {
+            const formId = req.params.formId;
+            const countResponse = await this.getFormResponseCount(formId);
+            return getFormattedResponseFormSchema(res, countResponse);
+        })
         api.get('/all/response', async (req: RequestWithUser, res) => {
             const user = req.user as UserProfile;
             const responses = await this.getAllUserFormResponses(user.id);
@@ -68,6 +73,20 @@ export class FormResponseService {
             return getFormattedResponseFormSchema(res, formResponse);
         })
         
+    }
+
+    public async getFormResponseCount(formId: string): Promise<ResponseSchema<number>> {
+        const responses = await this.prisma.formResponse.count({
+            where: {
+                formId: formId
+            }
+        })
+        return {
+            status: 200,
+            res: {
+                data: responses
+            }
+        }
     }
 
 

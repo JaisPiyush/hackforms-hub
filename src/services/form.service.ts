@@ -57,6 +57,7 @@ export class FormService {
             const forms = await this.getFormStatus(formIds);
             return getFormattedResponseFormSchema(res, forms);
         });
+
         open.get('/api/form/:formId', async (req, res) => {
             const formId = req.params.formId;
             const form = await this.getForm(formId)
@@ -86,6 +87,9 @@ export class FormService {
         }
 
     }
+
+
+
 
     public async createForm(user: UserProfile, body: CreateFormBody ): Promise<ResponseSchema<SerializedForm>> {
             

@@ -41,7 +41,7 @@
     "docker:down": "docker-compose down",
     "test": "yarn docker:up && yarn prisma migrate deploy && jest -i",
     "codegen": "prisma validate && prisma generate",
-    "migrate": "prisma migrate dev"
+    "migrate": "prisma migrate deploy"
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
