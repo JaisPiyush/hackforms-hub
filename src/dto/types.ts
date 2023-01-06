@@ -27,6 +27,8 @@ export interface EncryptedSchemaDto<T> {
       // EOA wallet address will be listed, not the Hackform identifier key
       // Each hackform identifier will be added mapped to single wallet address
       inviteList: Array<String>;
+      // Wallet address where payments can be made
+      payableWallet?: string;
     },
     tail: {
       hash: string,
